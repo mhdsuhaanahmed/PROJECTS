@@ -1,0 +1,92 @@
+import cv2
+import numpy as np
+from ultralytics import YOLO
+import sys
+
+model = YOLO("C:/Users/moham/OneDrive/Desktop/yolo11/resistordataset/runs/detect/train40/weights/best.pt")
+cap = cv2.VideoCapture(0)
+
+if not cap.isOpened():
+    print("Error: Could not open camera.")
+    sys.exit()
+
+class_descriptions = {
+    'IC': ("Integrated Circuit (IC): A miniaturized assembly of electronic components (e.g., transistors, diodes) "
+           "on a semiconductor substrate to perform specific functions.\n"
+           "- Units: N/A\n"
+           "- Symbol: Rectangular box\n"
+           "- Function: Processing and control in circuits."),
+    'LED': ("Light Emitting Diode (LED): A semiconductor diode that emits light when forward biased.\n"
+            "- Units: Current (A), Voltage (V)\n"
+            "- Symbol: Triangle with arrows pointing outward\n"
+            "- Function: Converts electrical energy to light."),
+    'capacitor': ("Capacitor: A passive component that stores and releases electrical energy.\n"
+                  "- Units: Capacitance (Farads, F)\n"
+                  "- Symbol: Two parallel lines (one may be curved for polarized capacitors)\n"
+                  "- Function: Energy storage, filtering, and timing."),
+    'diode': ("Diode: A semiconductor device that allows current to flow in one direction.\n"
+              "- Units: Voltage (V), Current (A)\n"
+              "- Symbol: Triangle with a line perpendicular to one side\n"
+              "- Function: Rectification and protection."),
+    'resistor': ("Resistor: A passive component that resists the flow of electric current to control voltage and current.\n"
+                 "- Units: Resistance (Ohms, Ω)\n"
+                 "- Symbol: Zigzag line or rectangle\n"
+                 "- Function: Voltage division and current limiting."),
+    'transistor': ("Transistor: An active semiconductor device used for signal amplification and switching.\n"
+                   "- Units: Current (A), Voltage (V)\n"
+                   "- Symbol: NPN/PNP symbol (arrows indicate emitter direction)\n"
+                   "- Function: Signal amplification and electronic switching."),
+    'trimpot': ("Trimpot (Trimmer Potentiometer): A small adjustable resistor used to fine-tune circuit parameters.\n"
+                "- Units: Resistance (Ohms, Ω)\n"
+                "- Symbol: Resistor with an arrow\n"
+                "- Function: Calibration and adjustment.")
+}
+
+detected_components = {}
+
+try:
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: Failed to capture image.")
+            break
+
+        results = model(frame)
+        frame_with_boxes = results[0].plot()
+
+        for box in results[0].boxes:
+            class_id = int(box.cls.item())
+            label = list(class_descriptions.keys())[class_id]
+            description = class_descriptions[label]
+
+            confidence = box.conf.item()
+
+            # Extract bounding box coordinates safely
+            xywh = box.xywh[0].cpu().numpy()  # Convert tensor to numpy array
+            x_center, y_center, width, height = xywh
+            x1 = int(x_center - width / 2)
+            y1 = int(y_center - height / 2)
+            x2 = int(x_center + width / 2)
+            y2 = int(y_center + height / 2)
+
+            frame_with_boxes = cv2.rectangle(frame_with_boxes, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            frame_with_boxes = cv2.putText(frame_with_boxes, f"{label}: {confidence:.2f}",
+                                           (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
+
+            if label not in detected_components:
+                detected_components[label] = True
+                description_img = np.zeros((300, 600, 3), dtype="uint8")
+                y_offset = 20
+                for line in description.split('\n'):
+                    cv2.putText(description_img, line, (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                    y_offset += 20
+                cv2.imshow(f"Detected: {label}", description_img)
+
+        cv2.imshow("Component Detection", frame_with_boxes)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+finally:
+    cap.release()
+    cv2.destroyAllWindows()
+    print("Camera released and all windows closed.")
