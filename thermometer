@@ -1,0 +1,54 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+const int sensorPin = A0;
+float sensorValue;
+float voltageOut;
+float temperatureC;
+
+void setup() {
+  pinMode(sensorPin, INPUT);
+  Serial.begin(9600);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    while (1); // Infinite loop if OLED fails
+  }
+
+  delay(1000);
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  sensorValue = analogRead(sensorPin);
+  voltageOut = (sensorValue * 5.0) / 1023.0 * 1000;  // in millivolts (5V ref)
+  temperatureC = voltageOut / 10.0;
+
+  Serial.print("Temperature (°C): ");
+  Serial.println(temperatureC);
+
+  display.clearDisplay();
+
+  // Title
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.print("Temperature Reading");
+
+  // Celsius Value
+  display.setTextSize(3);              // Large font
+  display.setCursor(10, 20);
+  display.print(temperatureC, 1);      // one decimal place
+  display.cp437(true);
+  display.write(167);                  // Degree symbol
+  display.print("C");
+
+  display.display();
+  delay(1000);
+}
