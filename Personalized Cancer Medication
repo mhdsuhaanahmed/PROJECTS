@@ -1,0 +1,55 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+# Load the .tsv file
+file_path = 'C:\\Users\\moham\\OneDrive\\Desktop\\bioinformaticsp2\\msk_impact.tsv'
+data = pd.read_csv(file_path, delimiter='\t')
+
+# Check column names
+print(data.columns)
+
+# Use 'Mutation Count' as the genetic variation data
+# Use 'Overall Survival Status' as the target variable
+data['Genetic_Variation'] = data['Mutation Count'].astype(str)  # Convert to string for tokenization
+data['Mutation_Effect'] = data['Overall Survival Status']
+
+# Drop missing values
+data = data.dropna()
+
+# Encode the target variable
+label_encoder = LabelEncoder()
+data['Mutation_Effect'] = label_encoder.fit_transform(data['Mutation_Effect'])
+
+# Tokenize and pad sequences
+tokenizer = Tokenizer(num_words=5000)
+tokenizer.fit_on_texts(data['Genetic_Variation'])
+sequences = tokenizer.texts_to_sequences(data['Genetic_Variation'])
+max_len = 100
+X = pad_sequences(sequences, maxlen=max_len)
+y = data['Mutation_Effect']
+
+# Split the data
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build and train the model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Embedding
+
+model = Sequential()
+model.add(Embedding(input_dim=5000, output_dim=128))  # Remove input_length
+model.add(LSTM(128, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(64, activation='relu'))
+model.add(Dense(len(label_encoder.classes_), activation='softmax'))
+
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+history = model.fit(X_train, y_train, epochs=50, batch_size=64, validation_split=0.2)
+
+# Evaluate the model
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f'Test Accuracy: {accuracy:.2f}')
+
+# Save the model
+model.save('cancer_mutation_model.keras')  # Use .keras format
