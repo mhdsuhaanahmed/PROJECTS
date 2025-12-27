@@ -43,6 +43,3 @@ confidence
 Mohammed Suhaan Ahmed
 Biomedical Engineering
 Osmania University
-Results are drawn on a canvas over the video feed.
-
-Component info is rendered below the detection screen.
