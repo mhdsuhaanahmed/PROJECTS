@@ -1,0 +1,116 @@
+/* ------------------------------
+   GLOBAL STYLES
+------------------------------ */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: #0b0f19;
+  color: white;
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+nav a {
+  color: #00ffc8;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: white;
+  text-shadow: 0 0 10px #00ffc8;
+}
+
+/* ------------------------------
+   HERO SECTION
+------------------------------ */
+.hero {
+  padding: 120px 20px;
+  background: linear-gradient(135deg, #0b0f19, #112233);
+}
+
+.hero h1 {
+  font-size: 60px;
+  margin-bottom: 10px;
+  color: #00ffc8;
+}
+
+.hero p {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+.button {
+  display: inline-block;
+  padding: 12px 26px;
+  background: #00ffc8;
+  color: #0b0f19;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 700;
+  transition: 0.3s;
+}
+
+.button:hover {
+  background: white;
+}
+
+/* ------------------------------
+   DETECTION PAGE
+------------------------------ */
+.detect-container {
+  margin: 30px auto;
+  width: 90%;
+  max-width: 900px;
+  position: relative;
+}
+
+video, canvas {
+  width: 100%;
+  border-radius: 20px;
+  background: black;
+}
+
+/* ------------------------------
+   INFO BOX FOR DETECTED PARTS
+------------------------------ */
+.info-box {
+  margin: 25px auto;
+  padding: 25px;
+  width: 85%;
+  max-width: 900px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+
+  text-align: left;
+  color: white;
+  line-height: 1.6;
+}
+
+.info-box h2 {
+  color: #00ffc8;
+  margin-bottom: 10px;
+}
+
+/* ------------------------------
+   FOOTER
+------------------------------ */
+footer {
+  margin-top: 80px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
